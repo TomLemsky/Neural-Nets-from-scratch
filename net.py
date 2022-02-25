@@ -1,6 +1,6 @@
 import numpy as np
-from sklearn.datasets import fetch_openml
-from sklearn.utils import shuffle
+
+from datasets import load_mnist
 
 class FullyConnectedLayer:
     """ A fully connected layer"""
@@ -271,7 +271,7 @@ class FeedForwardNet:
                 result.append(np.sum(np.equal(np.argmax(a,axis=0),np.argmax(y,axis=0)))) # Count correct guesses
                 if (b-1)%acc_no==0:
                     training_accuracy = sum(result[-acc_no:])/(batch_size * min(acc_no,len(result)))
-                    print(f"Training accuracy: {training_accuracy}")
+                    print(f"Training accuracy over the last {acc_no} batches: {training_accuracy}")
 
     def test(self, X_test, y_test):
         correct_guesses = 0
@@ -376,39 +376,28 @@ def one_hot_encoding(vec, n):
     result[np.arange(len(vec)), vec] = 1
     return result
 
-input_size = 2
-output_size = 1
+if __name__ == '__main__':
+    learning_rate = 0.02
+    epochs = 2
 
-learning_rate = 0.02
-epochs = 10
+    X_train, y_train, X_test, y_test = load_mnist()
 
-training_size = 60000
-test_size     = 10000
-dataset_name = "mnist_784"
-X_train, y_train, X_test, y_test = load_openml(training_size, test_size, dataset_name)
-#X_train, y_train = generate_XOR_dataset(training_size)
+    model = FeedForwardNet()
+    model.add(InputLayer(784))
+    model.add(FullyConnectedLayer(100))
+    model.add(TanhLayer())
+    model.add(FullyConnectedLayer(50))
+    model.add(TanhLayer())
+    model.add(FullyConnectedLayer(10))
 
-model = FeedForwardNet()
-model.add(InputLayer(784))
-model.add(FullyConnectedLayer(100))
-model.add(TanhLayer())
-model.add(FullyConnectedLayer(50))
-model.add(TanhLayer())
-model.add(FullyConnectedLayer(10))
+    print("Example forward pass with randomly initialized weights: ")
+    a=model.forward(X_train[:5].T)
+    print(a)
+    print(a.shape)
 
-#print(model.layers[::-1])
+    model.train(X_train, y_train, learning_rate, epochs, batch_size=10)
+    print(f"\nFinished training! \n")
+    print('Accuracy on training set: ', model.test(X_train, y_train))
+    print('Accuracy on test set    : ', model.test(X_test, y_test))
 
-a=model.forward(X_train[:5].T)
-print(a)
-print(a.shape)
-
-model.train(X_train, y_train, learning_rate, epochs, batch_size=10)
-print('Train accuracy: ', model.test(X_train, y_train))
-print('Test accuracy: ' , model.test(X_test, y_test))
-
-
-
-#model.gradient_check(X_train[4],y_train[4])
-#print(model.layers[1].dC_dW)
-#print(X_train[3])
-#print(model.test(X_test, y_test))
+    #model.gradient_check(X_train[4],y_train[4])

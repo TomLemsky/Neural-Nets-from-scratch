@@ -1,6 +1,7 @@
 import numpy as np
-from sklearn.datasets import fetch_openml
 from sklearn.utils import shuffle
+
+from datasets import load_mnist
 
 def compute_gradients(weight_vector, x, y, output_only=False, cost_only=False):
     W_1, b_1, W_2, b_2 = vector_to_weights(weight_vector)
@@ -101,8 +102,8 @@ def train_model(epochs, batch_size , learning_schedule, momentum_schedule, X_tra
                     print(f"Training accuracy: {training_accuracy} (Trained on {i+1} samples)")
                 if (i+1)%10000==0:
                     test_accuracy = test_model(weight_vector, X_val[:1000], y_val[:1000])
-                    print(f"Test accuracy: {test_accuracy} (Epoch {e+1})")
-                    print(f"Learning rate: {learning_rate}; Momentum: {mu}")
+                    print(f"\nTest accuracy: {test_accuracy} (Epoch {e+1})")
+                    print(f"Learning rate: {learning_rate}; Momentum: {mu}\n")
             gradient = accumulated_gradients
             # momentum update
             v = np.multiply(mu, v) - np.multiply(learning_rate, gradient)
@@ -178,31 +179,33 @@ def load_data(training_size, test_size, dataset_name):
     y_test = y[-test_size:].astype(float_type)
     return X_train, y_train, X_test, y_test
 
-# single-precsion float for faster computation
-float_type = np.float32
+if __name__ == '__main__':
+    # single-precision float for faster computation
+    float_type = np.float32
 
-epochs = 50
-batch_size = 20
-learning_rate = [0.05]*20 + [0.01]*20 + [0.005]*20
-momentum = 0
+    epochs = 5
+    batch_size = 20
+    # learning schedule
+    learning_rate = [0.05]*20 + [0.01]*20 + [0.005]*20
+    momentum = 0
 
 
-input_size = 28*28
-hidden_size = 100
-output_size = 10
+    input_size = 28*28
+    hidden_size = 100
+    output_size = 10
+    #
+    # training_size = 60000
+    # test_size     = 10000
+    dataset_name = "mnist_784"
 
-training_size = 60000
-test_size     = 10000
-dataset_name = "mnist_784"
+    print(f"Loading dataset {dataset_name}")
+    X_train, y_train, X_test, y_test = load_mnist()
+    print(f"Finished loading {dataset_name}")
 
-print(f"Loading dataset {dataset_name}")
-X_train, y_train, X_test, y_test = load_data(training_size, test_size, dataset_name)
-print(f"Finished loading {dataset_name}")
+    weight_vector = train_model(epochs, batch_size, learning_rate, momentum, X_train, y_train, X_test, y_test)
+    print("\nFinished training!\n")
 
-weight_vector = train_model(epochs, batch_size, learning_rate, momentum, X_train, y_train, X_test, y_test)
-print("Finished training!")
+    print("Type: ", weight_vector.dtype)
 
-print("Type: ", weight_vector.dtype)
-
-test_accuracy = test_model(weight_vector, X_test, y_test)
-print(f"Test accuracy on full test set: {test_accuracy} (After {epochs} Epochs)")
+    test_accuracy = test_model(weight_vector, X_test, y_test)
+    print(f"Test accuracy on full test set: {test_accuracy} (After {epochs} Epochs)")
