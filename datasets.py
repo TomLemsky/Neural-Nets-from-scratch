@@ -1,12 +1,23 @@
 import h5py
 import numpy as np
 
+def shuffle(a,b):
+    """Shuffle two numpy lists in the same way"""
+    length = max(len(a),len(b))
+    indexes = np.arange(length)
+    np.random.shuffle(indexes)
+    a = a[indexes]
+    b = b[indexes]
+    return a, b
+
 def one_hot_encoding(vec, n):
+    """One-hot encoding of the input vector vec with n classes"""
     result = np.zeros((len(vec),n))
     result[np.arange(len(vec)), vec] = 1
     return result
 
 def generate_XOR_dataset(training_set_size):
+    """Generates a simple dataset for the XOR problem"""
     input_size  = 2
     output_size = 1
     X_train = np.zeros((training_set_size, input_size))
@@ -21,6 +32,7 @@ def generate_XOR_dataset(training_set_size):
     return X_train, y_train
 
 def load_mnist(path="./data/mnist_dataset.h5"):
+    """Load the MNIST dataset from a .h5 file"""
     print("Loading MNIST dataset...")
     n_classes = 10
     float_type = np.float32
@@ -47,6 +59,7 @@ def load_mnist(path="./data/mnist_dataset.h5"):
 
 
 def load_openml(training_size, test_size, dataset_name):
+    """Load a dataset from the openml website"""
     print(f"Loading dataset: {dataset_name}")
     from sklearn.datasets import fetch_openml
 

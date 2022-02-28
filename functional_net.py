@@ -1,7 +1,10 @@
 import numpy as np
-from sklearn.utils import shuffle
+import argparse
 
-from datasets import load_mnist
+from datasets import load_mnist, shuffle
+
+# single-precision float for faster computation
+FLOAT_TYPE = np.float32
 
 def compute_gradients(weight_vector, x, y, output_only=False, cost_only=False):
     W_1, b_1, W_2, b_2 = vector_to_weights(weight_vector)
@@ -67,16 +70,16 @@ def train_model(epochs, batch_size , learning_schedule, momentum_schedule, X_tra
         momentum_schedule = list(momentum_schedule) + [momentum_schedule[-1]]*epochs
 
     # first layer weights and biases
-    W_1 = np.random.normal(0, 1, size=(input_size, hidden_size)).astype(float_type)
-    b_1 = np.zeros((1, hidden_size)).astype(float_type)
-    #b_1 = np.random.normal(0, 1, size=(1, hidden_size)).astype(float_type)
+    W_1 = np.random.normal(0, 1, size=(input_size, hidden_size)).astype(FLOAT_TYPE)
+    b_1 = np.zeros((1, hidden_size)).astype(FLOAT_TYPE)
+    #b_1 = np.random.normal(0, 1, size=(1, hidden_size)).astype(FLOAT_TYPE)
 
     # second layer weights and biases
-    W_2 = np.random.normal(0, 1, size=(hidden_size, output_size)).astype(float_type)
-    b_2 = np.zeros((1, output_size)).astype(float_type)
-    #b_2 = np.random.normal(0, 1, size=(1, output_size)).astype(float_type)
+    W_2 = np.random.normal(0, 1, size=(hidden_size, output_size)).astype(FLOAT_TYPE)
+    b_2 = np.zeros((1, output_size)).astype(FLOAT_TYPE)
+    #b_2 = np.random.normal(0, 1, size=(1, output_size)).astype(FLOAT_TYPE)
 
-    weight_vector = weights_to_vector(W_1, b_1, W_2, b_2).astype(float_type)
+    weight_vector = weights_to_vector(W_1, b_1, W_2, b_2).astype(FLOAT_TYPE)
 
     accuracy = test_model(weight_vector, X_val, y_val)
     print(accuracy)
@@ -172,26 +175,25 @@ def load_data(training_size, test_size, dataset_name):
     # convert each row to a vector with exactly one 1 in the correct place
     targets = mnist['target'].astype(np.dtype(np.int16))
     y = one_hot_encoding(targets,output_size)
-    X_train = X[:training_size].astype(float_type)
-    y_train = y[:training_size].astype(float_type)
+    X_train = X[:training_size].astype(FLOAT_TYPE)
+    y_train = y[:training_size].astype(FLOAT_TYPE)
 
-    X_test = X[-test_size:].astype(float_type)
-    y_test = y[-test_size:].astype(float_type)
+    X_test = X[-test_size:].astype(FLOAT_TYPE)
+    y_test = y[-test_size:].astype(FLOAT_TYPE)
     return X_train, y_train, X_test, y_test
 
-if __name__ == '__main__':
-    # single-precision float for faster computation
-    float_type = np.float32
+def main(args):
+    epochs = args.epochs #5
+    batch_size = args.batch_size #20
+    # learning rate or learning schedule
+    #learning_rate = [0.05]*20 + [0.01]*20 + [0.005]*20
+    learning_rate = args.lr #0.1
+    momentum = args.momentum #0.1
 
-    epochs = 5
-    batch_size = 20
-    # learning schedule
-    learning_rate = [0.05]*20 + [0.01]*20 + [0.005]*20
-    momentum = 0
-
-
+    # make these variables accessible to all functions in this file
+    global input_size, hidden_size, output_size
     input_size = 28*28
-    hidden_size = 100
+    hidden_size = args.hidden_neurons #100
     output_size = 10
     #
     # training_size = 60000
@@ -209,3 +211,14 @@ if __name__ == '__main__':
 
     test_accuracy = test_model(weight_vector, X_test, y_test)
     print(f"Test accuracy on full test set: {test_accuracy} (After {epochs} Epochs)")
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Run two-layer fully-connected network.')
+    parser.add_argument('--lr', default=0.1, type=float, help='Learning rate')
+    parser.add_argument('--momentum', default=0.1, type=float, help='Momentum for gradient descent with momentum')
+    parser.add_argument('--hidden_neurons', default=100, type=int, help='Number of hidden neurons')
+    parser.add_argument('--epochs', default=5, type=int, help='How many epochs to train for')
+    parser.add_argument('--batch_size', default=20, type=int, help='Batch size during training')
+
+    args = parser.parse_args()
+    main(args)

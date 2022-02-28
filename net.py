@@ -1,4 +1,5 @@
 import numpy as np
+import argparse
 
 from datasets import load_mnist
 
@@ -376,28 +377,47 @@ def one_hot_encoding(vec, n):
     result[np.arange(len(vec)), vec] = 1
     return result
 
-if __name__ == '__main__':
-    learning_rate = 0.02
-    epochs = 2
+def main(args):
+    learning_rate = args.lr #0.02
+    epochs = args.epochs #2
+    batch_size = args.batch_size # 10
 
     X_train, y_train, X_test, y_test = load_mnist()
+    input_size = 28*28
+    n_classes  = 10
 
     model = FeedForwardNet()
-    model.add(InputLayer(784))
+    model.add(InputLayer(input_size))
     model.add(FullyConnectedLayer(100))
-    model.add(TanhLayer())
+    model.add(ReLuLayer())
     model.add(FullyConnectedLayer(50))
-    model.add(TanhLayer())
-    model.add(FullyConnectedLayer(10))
+    model.add(ReLuLayer())
+    model.add(FullyConnectedLayer(n_classes))
 
-    print("Example forward pass with randomly initialized weights: ")
-    a=model.forward(X_train[:5].T)
-    print(a)
-    print(a.shape)
+    # print("Example forward pass with randomly initialized weights: ")
+    # a=model.forward(X_train[:1].T)
+    # print(a)
+    # print(a.shape)
 
-    model.train(X_train, y_train, learning_rate, epochs, batch_size=10)
+    model.train(X_train, y_train, learning_rate, epochs, batch_size=batch_size)
     print(f"\nFinished training! \n")
+
+    output = model.forward(X_train[:1].T)
+    prediction   = np.argmax(output)
+    ground_truth = np.argmax(y_train[:1].T)
+    print(f"Example prediction: {prediction} (Ground truth: {ground_truth}))")
+
     print('Accuracy on training set: ', model.test(X_train, y_train))
     print('Accuracy on test set    : ', model.test(X_test, y_test))
 
     #model.gradient_check(X_train[4],y_train[4])
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Run two-layer fully-connected network.')
+    parser.add_argument('--lr', default=0.1, type=float, help='Learning rate')
+    parser.add_argument('--momentum', default=0.1, type=float, help='Momentum for gradient descent with momentum')
+    parser.add_argument('--epochs', default=5, type=int, help='How many epochs to train for')
+    parser.add_argument('--batch_size', default=10, type=int, help='Batch size during training')
+
+    args = parser.parse_args()
+    main(args)
