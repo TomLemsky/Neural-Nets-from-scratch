@@ -168,20 +168,6 @@ def one_hot_encoding(vec, n):
     result[np.arange(len(vec)), vec] = 1
     return result
 
-def load_data(training_size, test_size, dataset_name):
-    mnist = fetch_openml(name=dataset_name, data_home="data") # https://www.openml.org/d/554
-    # normalize pixel values to be between 0 and 1
-    X = mnist['data']/255
-    # convert each row to a vector with exactly one 1 in the correct place
-    targets = mnist['target'].astype(np.dtype(np.int16))
-    y = one_hot_encoding(targets,output_size)
-    X_train = X[:training_size].astype(FLOAT_TYPE)
-    y_train = y[:training_size].astype(FLOAT_TYPE)
-
-    X_test = X[-test_size:].astype(FLOAT_TYPE)
-    y_test = y[-test_size:].astype(FLOAT_TYPE)
-    return X_train, y_train, X_test, y_test
-
 def main(args):
     epochs = args.epochs #5
     batch_size = args.batch_size #20
