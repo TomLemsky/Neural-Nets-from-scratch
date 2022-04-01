@@ -2,9 +2,11 @@
 
 These are implementations of neural networks I implemented completly from scratch. Only the numpy library is used for matrix multiplications. The correctness of the gradient computation is verified with numerical gradient checking.
 
+- net.py is a modular feedforward network that different layers can be added to. It uses an object-oriented approach to store weights and compute gradients in the layer objects. To the outside, the models have a Keras-like API to train and test them.
+
 - functional_net.py is a hardcoded two-layer fully-connected network. It is implemented with a completely functional approach, with the model's weights as an input argument to every function. This makes this version pretty slow to run.
 
-- net.py is a modular feedforward network that different layers can be added to. It uses an object-oriented approach to store weights and compute gradients in the layer objects. To the outside, the models have a Keras-like API to train and test them.
+
 
 ## Requirements
 
@@ -13,27 +15,6 @@ These are implementations of neural networks I implemented completly from scratc
 - h5py (to load data)
 
 ## Command-line Usage
-
-Command-line usage to train functional_net.py on the MNIST dataset:
-
-```
-usage: functional_net.py [-h] [--lr LR] [--momentum MOMENTUM]
-                         [--hidden_neurons HIDDEN_NEURONS] [--epochs EPOCHS]
-                         [--batch_size BATCH_SIZE]
-
-Run two-layer fully-connected network.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --lr LR               Learning rate
-  --momentum MOMENTUM   Momentum for gradient descent with momentum
-  --hidden_neurons HIDDEN_NEURONS
-                        Number of hidden neurons
-  --epochs EPOCHS       How many epochs to train for
-  --batch_size BATCH_SIZE
-                        Batch size during training
-
-```
 
 Command-line usage to train net.py on the MNIST dataset:
 
@@ -85,4 +66,27 @@ output = model.forward(X_train[:1].T)
 prediction   = np.argmax(output)
 ground_truth = np.argmax(y_train[:1].T)
 print(f"Example prediction: {prediction} (Ground truth: {ground_truth}))")
+```
+
+## functional_net.py
+
+Command-line usage to train functional_net.py on the MNIST dataset:
+
+```
+usage: functional_net.py [-h] [--lr LR] [--momentum MOMENTUM]
+                         [--hidden_neurons HIDDEN_NEURONS] [--epochs EPOCHS]
+                         [--batch_size BATCH_SIZE]
+
+Run two-layer fully-connected network.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --lr LR               Learning rate
+  --momentum MOMENTUM   Momentum for gradient descent with momentum
+  --hidden_neurons HIDDEN_NEURONS
+                        Number of hidden neurons
+  --epochs EPOCHS       How many epochs to train for
+  --batch_size BATCH_SIZE
+                        Batch size during training
+
 ```
